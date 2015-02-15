@@ -12,6 +12,16 @@ var b2AABB = Box2D.Collision.b2AABB;
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 var b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef;
 
+// These vars help with window resizing and keeping scale in check 
+var originalWidth = 1024;
+var originalHeight = 500;
+var drawScaleX = 0;
+var drawScaleY = 0;
+
+// Mouse interaction helper
+var mouseX, mouseY, mousePVec, isMouseDown, isMouseMove, selectedBody, mouseJoint;
+var canvas = document.getElementById("canvas");
+
 // Physics object, runs a loop within the game loop calculating colisions and movement.
 var Physics = window.Physics = function(element,world) {
   var gravity = GRAVITY || new b2Vec2(0,9.8);
@@ -375,13 +385,16 @@ var geometryHandler = function(physics,id){
   }
 
   function buildEnd(){
-
     var  bodyDef = {
+      // orient the shape to make bottom left the first vertex 
       x: selection.x < selection.x_end ? selection.x : selection.x_end,
       y: selection.y > selection.y_end ? selection.y : selection.y_end,
       width: (selection.x - selection.x_end)>0 ? (selection.x - selection.x_end) : -(selection.x - selection.x_end),
       height: (selection.y - selection.y_end)>0 ? (selection.y - selection.y_end) : -(selection.y - selection.y_end)
     };
+
+    bodyDef.width = (bodyDef.width == 0) ? 1 : bodyDef.width;
+    bodyDef.height = (bodyDef.height == 0) ? 1 : bodyDef.height;
 
     body = new Body(physicsReference, { 
       type: "kinematic", 
@@ -426,10 +439,6 @@ var geometryHandler = function(physics,id){
 };
 
 // Mouse interaction from makenewgames.com
-
-var mouseX, mouseY, mousePVec, isMouseDown, isMouseMove, selectedBody, mouseJoint;
-var canvas = document.getElementById("canvas");
-
 document.addEventListener("mousedown", function(e) {
 
   isMouseDown = true;
@@ -518,28 +527,25 @@ document.onkeydown=function(){
   return event.keyCode!=38 && event.keyCode!=40 && event.ketCode!=37 && event.keyCode!=39;
 };
 
-//http://js-tut.aardon.de/js-tut/tutorial/position.html
-function getElementPosition(element) {
-  var elem=element, tagname="", x=0, y=0;
+function resizeCanvas () {
+  // Use the parent containers width and height to resize the element
 
-  console.log(element);
+  // $("#canvas").width(1024);
+  // $("#canvas").height(1000);
 
-  while((typeof(elem) == "object") && (typeof(elem.tagName) != "undefined")) {
-    y += elem.offsetTop;
-    x += elem.offsetLeft;
-    tagname = elem.tagName.toUpperCase();
+  var $parent = $("#canvas").offsetParent();
+  var newWidth = $parent.width();
+  var newHeight = $parent.height()
 
-    if(tagname == "BODY")
-      elem=0;
+  $("#canvas").width(newWidth);
+  $("#canvas").height(newHeight);
 
-    if(typeof(elem) == "object") {
-      if(typeof(elem.offsetParent) == "object")
-        elem = elem.offsetParent;
-    }
-  }
+  drawScaleX = originalWidth/newWidth;
+  drawScaleY = originalHeight/newHeight;
 
-  return {x: x, y: y};
+  console.log(drawScaleY);
 }
+
 
 // Lastly, add in the `requestAnimationFrame` shim, if necessary. Does nothing 
 // if `requestAnimationFrame` is already on the `window` object.

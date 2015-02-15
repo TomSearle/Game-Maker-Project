@@ -15,7 +15,7 @@
       <div data-role="header">
          <h1>Game Maker Project</h1>
       </div>
-      <div data-role="content">
+      <div class="content" data-role="content">
          <canvas id="canvas" width="1024" height="500"></canvas>
       </div>
    </div>
@@ -27,5 +27,7 @@
    <script type="text/javascript" src="game.js"></script>
 </html>
 <style type="text/css">
-   canvas { background-color: white; }
+   canvas { background-color: white;}
+   .ui-content{ padding:0!important;}
+   .content{ position:absolute; top: 0; left: 0; width: 100%; }
 </style>

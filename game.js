@@ -17,7 +17,9 @@ var GRAVITY = new b2Vec2(0,9.8);
 
   var Game = {};
   Game.element = document.getElementById("canvas");
+  resizeCanvas();
   Game.context = Game.element.getContext("2d");
+  
   Game.scale = SCALE;
   var gravity = GRAVITY;
   Game.world = new b2World(GRAVITY, true);
@@ -143,7 +145,7 @@ var GRAVITY = new b2Vec2(0,9.8);
 
     // Save the context before transformations 
     this.context.save();
-    this.context.scale(this.scale,this.scale);
+    this.context.scale(this.scale*drawScaleX,this.scale*drawScaleY);
 
     for (var i = this.entities.length - 1; i >= 0; i--) {
         if(this.entities[i].render) {this.entities[i].render(Game.context);}
