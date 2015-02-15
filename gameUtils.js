@@ -44,22 +44,6 @@ Physics.prototype.step = function(dt) {
   }
 };
 
-// Button selection on website
-var UI = function(){
-
-  var buttonSetting = "quad";
-
-  function setSetting(shape) {
-    buttonSetting = shape;
-    console.log(shape);
-  }
-
-  return {
-    buttonSetting:buttonSetting,
-    setSetting:setSetting
-  }
-}
-
 // Shortcut for creating bodies
 var Body = window.Body = function(physics,details,id) {
   this.details = details = details || {};
@@ -444,7 +428,7 @@ var geometryHandler = function(physics,id){
 // Mouse interaction from makenewgames.com
 
 var mouseX, mouseY, mousePVec, isMouseDown, isMouseMove, selectedBody, mouseJoint;
-var canvasPosition = getElementPosition(document.getElementById("canvas"));
+var canvas = document.getElementById("canvas");
 
 document.addEventListener("mousedown", function(e) {
 
@@ -464,9 +448,20 @@ document.addEventListener("mouseup", function() {
 }, true);
 
 function handleMouseMove(e) {
-  // Changed scale to current game scale
-  mouseX = (e.clientX - canvasPosition.x) / SCALE;
-  mouseY = (e.clientY - canvasPosition.y) / SCALE;
+// http://stackoverflow.com/questions/55677/how-do-i-get-the-coordinates-of-a-mouse-click-on-a-canvas-element
+  if(e.pageX || e.pageY) {
+    mouseX = e.pageX;
+    mouseY = e.pageY;
+  } else {
+    mouseX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+    mouseY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+  }
+  mouseX -= canvas.offsetLeft;
+  mouseY -= canvas.offsetTop;
+
+  mouseX /= SCALE;
+  mouseY /= SCALE;
+
   isMouseMove = true;
 }
 
@@ -526,6 +521,8 @@ document.onkeydown=function(){
 //http://js-tut.aardon.de/js-tut/tutorial/position.html
 function getElementPosition(element) {
   var elem=element, tagname="", x=0, y=0;
+
+  console.log(element);
 
   while((typeof(elem) == "object") && (typeof(elem.tagName) != "undefined")) {
     y += elem.offsetTop;
