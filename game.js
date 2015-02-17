@@ -17,7 +17,6 @@ var GRAVITY = new b2Vec2(0,9.8);
 
   var Game = {};
   Game.element = document.getElementById("canvas");
-  resizeCanvas();
   Game.context = Game.element.getContext("2d");
   
   Game.scale = SCALE;
@@ -143,9 +142,13 @@ var GRAVITY = new b2Vec2(0,9.8);
         Game.physics.world.DrawDebugData();
     }
 
+    drawGrid(Game.context);
+
     // Save the context before transformations 
     this.context.save();
-    this.context.scale(this.scale*drawScaleX,this.scale*drawScaleY);
+    this.context.scale(this.scale,this.scale);
+
+
 
     for (var i = this.entities.length - 1; i >= 0; i--) {
         if(this.entities[i].render) {this.entities[i].render(Game.context);}

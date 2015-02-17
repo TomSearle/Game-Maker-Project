@@ -359,6 +359,13 @@ var inputHandler = (function () {
 
 })();
 
+var selectionHandler = function(physics, id){
+
+  var selection = {
+    
+  }
+}
+
 // Dynamic geometry generation
 var geometryHandler = function(physics,id){
 
@@ -369,8 +376,8 @@ var geometryHandler = function(physics,id){
   var _id = id;
 
   var selection = {
-    x: mouseX,
-    y: mouseY,
+    x: snapToGrid(mouseX),
+    y: snapToGrid(mouseY),
     x_end: mouseX,
     y_end: mouseY
   };
@@ -413,8 +420,8 @@ var geometryHandler = function(physics,id){
 
     if (!drawing) { return; }
 
-    selection.x_end = mouseX;
-    selection.y_end = mouseY;
+    selection.x_end = snapToGrid(mouseX);
+    selection.y_end = snapToGrid(mouseY);
   }
 
   function render(context){
@@ -438,6 +445,48 @@ var geometryHandler = function(physics,id){
   };
 };
 
+var drawGridSize = 1;
+
+function setDrawGrid(gridSize) {
+  drawGridSize = gridSize;
+}
+
+function snapToGrid(value){
+
+  var output = value;
+
+  if(value > 0) {
+    output = Math.floor(value / drawGridSize) * drawGridSize;
+  } else if ( n < 0) {
+    output = Math.ceil(value / drawGridSize) * drawGridSize;
+  } else {
+    output = drawGridSize;
+  }
+
+  return output;
+}
+
+function drawGrid(context){
+
+  var bw = 1024;
+  var bh = 768;
+
+  var drawInterval = drawGridSize * SCALE;
+
+    for (var x = 0; x <= bw; x += drawInterval) {
+        context.moveTo(x,0);
+        context.lineTo(x,bh);
+    }
+
+    for (var y = 0; y <= bh; y += drawInterval) {
+        context.moveTo(0,y);
+        context.lineTo(bw,y);
+    }
+
+    context.strokeStyle = "#cccccc";
+    context.stroke();
+}
+
 // Mouse interaction from makenewgames.com
 document.addEventListener("mousedown", function(e) {
 
@@ -456,20 +505,23 @@ document.addEventListener("mouseup", function() {
 
 }, true);
 
+var gridX, gridY = 0;
+
 function handleMouseMove(e) {
 // http://stackoverflow.com/questions/55677/how-do-i-get-the-coordinates-of-a-mouse-click-on-a-canvas-element
   if(e.pageX || e.pageY) {
     mouseX = e.pageX;
     mouseY = e.pageY;
   } else {
-    mouseX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-    mouseY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    mouseX = (e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft);
+    mouseY = (e.clientY + document.body.scrollTop + document.documentElement.scrollTop);
   }
+
   mouseX -= canvas.offsetLeft;
   mouseY -= canvas.offsetTop;
 
-  mouseX /= SCALE;
-  mouseY /= SCALE;
+  mouseX /= SCALE / widthScale;
+  mouseY /= SCALE / heightScale;
 
   isMouseMove = true;
 }
@@ -527,25 +579,43 @@ document.onkeydown=function(){
   return event.keyCode!=38 && event.keyCode!=40 && event.ketCode!=37 && event.keyCode!=39;
 };
 
-function resizeCanvas () {
-  // Use the parent containers width and height to resize the element
+var nativeRatio = 4/6;
+var nativeWidth = 1024;
+var nativeHeight = 768;
+var widthScale = 0;
+var heightScale = 0;
 
-  // $("#canvas").width(1024);
-  // $("#canvas").height(1000);
+$(window).resize(onResize);
+$(window).load(onResize);
 
-  var $parent = $("#canvas").offsetParent();
-  var newWidth = $parent.width();
-  var newHeight = $parent.height()
+function onResize() {
+
+  var height = $(window).height();
+  var width = $(window).width();
+
+  var newHeight;
+  var newWidth;
+
+  if(height > width) { 
+    alert("Please rotate device, application runs better in landscape"); 
+    width = 0;
+    height = 0;
+  }
+
+  if ((width * nativeRatio) > (height)) {
+    newHeight = height;
+    newWidth = height / nativeRatio;
+  } else {
+    newWidth = width;
+    newHeight = width * nativeRatio;
+  }
+
+  widthScale = nativeWidth / newWidth;
+  heightScale = nativeHeight / newHeight;
 
   $("#canvas").width(newWidth);
   $("#canvas").height(newHeight);
-
-  drawScaleX = originalWidth/newWidth;
-  drawScaleY = originalHeight/newHeight;
-
-  console.log(drawScaleY);
 }
-
 
 // Lastly, add in the `requestAnimationFrame` shim, if necessary. Does nothing 
 // if `requestAnimationFrame` is already on the `window` object.
