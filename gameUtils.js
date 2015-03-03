@@ -359,13 +359,6 @@ var inputHandler = (function () {
 
 })();
 
-var selectionHandler = function(physics, id){
-
-  var selection = {
-    
-  }
-}
-
 // Dynamic geometry generation
 var geometryHandler = function(physics,id){
 
@@ -457,7 +450,7 @@ function snapToGrid(value){
 
   if(value > 0) {
     output = Math.floor(value / drawGridSize) * drawGridSize;
-  } else if ( n < 0) {
+  } else if ( value < 0) {
     output = Math.ceil(value / drawGridSize) * drawGridSize;
   } else {
     output = drawGridSize;
@@ -586,7 +579,11 @@ var widthScale = 0;
 var heightScale = 0;
 
 $(window).resize(onResize);
-$(window).load(onResize);
+$(window).load(function(){
+  onResize();
+
+  $("#Draw").click(function(){console.log("hi")});
+});
 
 function onResize() {
 
